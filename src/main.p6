@@ -4,9 +4,9 @@ use Spell;
 
 multi MAIN(*@args) {
     my $spell = @args.join;
-    my $result = Spell.parse($spell, actions => SpellActions.new);
+    my $result = Spell.parse($spell, actions => SpellExecutionContext.new);
     
-    unless ($result) {
+    unless (defined($result) && $result.made) {
         say "The spell fizzles out along with any mana you put into it.";
     }
 }

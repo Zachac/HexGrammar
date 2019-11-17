@@ -10,27 +10,34 @@ grammar Spell {
     token ACTION:sym<INVERT> { 2DE }
     token ACTION:sym<LOAD> { 778 }
     token ACTION:sym<RESET> { F2E }
-    token ACTION:sym<DUMP> { 115 }
+    token ACTION:sym<EXECUTE> { 115 }
     token ACTION:sym<ADD> { AC3 }
     token ACTION:sym<SUB> { FEB }
     token ACTION:sym<COMBINE> { 8C8 }
-    token ACTION:sym<EXCRIBE> { 2F8 }
+    token ACTION:sym<ASSIMILATE> { 2F8 }
     token ACTION:sym<INSCRIBE> { 74E }
 }
 
-class SpellActions {
+class SpellExecutionContext {
+    has @.filters;
 
     method TOP($match) {
         return unless $match.pos == $match.orig.chars;
         
-        $_.made()() for $match<SPELL>
+        try {
+            $_.made()() for $match<SPELL>;
+            CATCH { default { 
+                say .message; 
+                $match.make(False);
+            } }
+        }
     }
 
     method SPELL ($match) {
         my @scalars = ();
         push @scalars, $_.made for $match<SCALAR>;
 
-        $match.make({$match<ACTION>.made()(@scalars)})
+        $match.make({$match<ACTION>.made()(self, @scalars)})
     }
 
     method SCALAR ($match) {
