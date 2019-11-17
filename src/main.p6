@@ -12,5 +12,18 @@ multi MAIN(*@args) {
 }
 
 multi MAIN() {
-    say "usage main.p6 spell"
+    my $context = SpellExecutionContext.new;
+
+    print "> ";
+    while my $line = $*IN.get {
+        my $result = Spell.parse($line, actions => $context);
+
+        if $result {
+            say "  " ~ $context.perl;
+        } else {
+            say "  The spell fizzles out along with any mana you put into it.";
+        }
+
+        print "> ";
+    }
 }
