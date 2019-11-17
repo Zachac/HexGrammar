@@ -1,11 +1,10 @@
-
+use Hex::Actions::Filter;
 
 grammar Spell {
-    token TOP { <SPELL> [<.SEP> <SPELL>]* }
-    token SPELL { <SCALAR> <.SEP> <ACTION> }
+    token TOP { <SPELL> [<.SEP> <SPELL>]* <.SEP>? }
+    token SPELL { <SCALAR>+ <.SEP> <ACTION> }
     token SEP { X }
-    token SCALAR { <DIGIT>+ }
-    token DIGIT { <[0..9A..F]><[0..9A..F]> }
+    token SCALAR { <[0..9A..F]><[0..9A..F]> }
     proto token ACTION {*}
     token ACTION:sym<FILTER> { 728 }
     token ACTION:sym<INVERT> { 2DE }
@@ -20,14 +19,23 @@ grammar Spell {
 }
 
 class SpellActions {
-    has @scale;
+
+    method TOP($match) {
+        return unless $match.pos == $match.orig.chars;
+        
+        $_.made()() for $match<SPELL>
+    }
+
+    method SPELL ($match) {
+        my @scalars = ();
+        push @scalars, $_.made for $match<SCALAR>;
+
+        $match.make({$match<ACTION>.made()(@scalars)})
+    }
 
     method SCALAR ($match) {
-        @scale = ();
-        push @scale, :16($_.Str) for $match<DIGIT>;
+        $match.make(:16($match.Str))
     }
 
-    method ACTION:sym<FILTER>($match) {
-        say "filtering with " ~ @scale.perl;
-    }
+    method ACTION:sym<FILTER>($match) { $match.make(Filter); }
 }
