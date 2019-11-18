@@ -1,10 +1,10 @@
 #!/usr/bin/env perl6
 use lib 'src/lib';
-use Spell;
+use Hex::Spell;
 
 multi MAIN(*@args) {
     my $spell = @args.join;
-    my $result = Spell.parse($spell, actions => SpellExecutionContext.new);
+    my $result = Spell.parse($spell, actions => SpellActions.new);
     
     unless (defined($result) && $result.made) {
         say "The spell fizzles out along with any mana you put into it.";
@@ -12,7 +12,7 @@ multi MAIN(*@args) {
 }
 
 multi MAIN() {
-    my $context = SpellExecutionContext.new;
+    my $context = SpellActions.new;
 
     print "> ";
     while my $line = $*IN.get {

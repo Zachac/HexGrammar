@@ -1,5 +1,6 @@
 use Hex::Actions::Filters;
 use Hex::Actions::Memory;
+use Hex::SpellContext;
 
 grammar Spell {
     token TOP { <SPELL> [<.SEP> <SPELL>]* <.SEP>? }
@@ -33,14 +34,7 @@ grammar Spell {
     token ACTION:sym<EXECUTE> { 115 }
 }
 
-class SpellExecutionContext {
-    has @.filters;
-    has $.register is rw;
-    has %.memory;
-
-    method TWEAK {
-        $.register = 0 unless defined self.register;
-    }
+class SpellActions is SpellContext {
 
     method TOP($match) {
         # return unless we matched the entire input
